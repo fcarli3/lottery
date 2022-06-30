@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/style.css">
+
+    <title>Lottery DApp Homepage</title>
+</head>
+
+<body>
+
+    <div class="box" id="title">
+        <h1 class="text-center"><strong>TRY Lottery</strong></h1>
+    </div>
+
+    <div class='parent1'>
+        <div class='child'>
+            <h2 class="text-center"><strong>Account Informations</strong></h2>
+        </div>
+
+        <div class='list'>
+            <div class='child' style="margin-left: 25%;">
+                <h3 class="text-left" id="address"><strong>Address:</strong></h3>
+            </div>
+
+            <div class='child'>
+                <h3 class="text-left" id="balance" style="margin-left: 26%;"><strong>Balance:</strong> </h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="op_interface">
+        <div class="cards-third">
+            <button class="btn btn-primary" onclick="App.deploy()" , style="margin-top: 1%; width: 200px;">Create
+                Lottery</button>
+        </div>
+    </div>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <!-- Web3 -->
+    <script src="./dist/web3.min.js"></script>
+    <script src="./dist/truffle-contract.js"></script>
+    <!-- App -->
+    <script src="./js/deploy_contracts.js"></script>
+
+
+</body>
+
+</html>
