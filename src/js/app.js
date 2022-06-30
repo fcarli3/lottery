@@ -122,17 +122,7 @@ App = {
     console.log("Inside listenForEvents");
 
     App.contracts["Contract"].deployed().then(async (instance) => {
-      /*
-            // LotteryCreation event
-            instance.LotteryCreation().on('data', function (event) {
-              App.lottery_state = 'lottery created';
-              $('#lottery_state').html("<strong>Lottery State:</strong> " + App.lottery_state);
-              $('#lottery_state_player').html("<strong>Lottery State:</strong> " + App.lottery_state);
       
-              console.log("Event LotteryCreation catched!");
-      
-            });*/
-
       // Round event
       instance.Round().on('data', function (event) {
         App.lottery_state = 'lottery created';
@@ -323,23 +313,6 @@ App = {
 
     renderUI(account_change);
   },
-
-  /*
-    //Call the smart contract's function to create a new lottery
-    createLottery: function () {
-      console.log("Inside createLottery");
-  
-      App.contracts["Contract"].deployed().then(async (instance) => {
-        try {
-          await instance.createLottery({ from: App.account });
-          alert("New lottery created!");
-          console.log("New lottery created!");
-          App.lottery_state = 'lottery created';
-        } catch (error) {
-          alert('Impossible to create a new lottery!');
-        }
-      });
-    },*/
 
 
   //Call the smart contract's function to start a new lottery round
