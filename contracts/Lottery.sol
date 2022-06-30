@@ -169,13 +169,7 @@ contract Lottery {
     }
 
     /* -------------------------- */
-    /*
-    event LotteryCreation(string str);
 
-    function createLottery() public lotteryOperator {
-        emit LotteryCreation("lottery created");
-    }
-*/
     //Function that reset a lottery round
     function resetLotteryRound() public {
         round.number = 0;
