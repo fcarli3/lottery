@@ -251,7 +251,6 @@ contract Lottery {
 
         delete prizes;
         delete lottery_players;
-        delete lottery_winners;
     }
 
     //Function that sort the winning numbers in ascendent order
@@ -359,6 +358,7 @@ contract Lottery {
             "Error: impossible to start a new lottery round!"
         );
 
+        delete lottery_winners;
         round.number = round.number + 1;
         round.state = 1;
         round.start_block = block.number;
@@ -678,6 +678,13 @@ contract Lottery {
                 );
             }
 
+            emit BalanceContractAfterClosing(address(this).balance);
+
+            emit BalanceOpAfterClosing(
+                lottery_operator,
+                lottery_operator.balance
+            );
+
             delete_();
             round.state = 3;
 
@@ -722,20 +729,32 @@ contract Lottery {
             return;
         }
 
-        emit BalanceContractBeforeClosing(address(this).balance);
+        if (round.state == 3) {
+            emit BalanceContractBeforeClosing(address(this).balance);
 
-        emit BalanceOpBeforeClosing(lottery_operator, lottery_operator.balance);
+            emit BalanceOpBeforeClosing(
+                lottery_operator,
+                lottery_operator.balance
+            );
 
-        total_balance = price * lottery_players.length;
-        payable(lottery_operator).transfer(total_balance);
-        delete_();
+            total_balance = price * lottery_players.length;
+            payable(lottery_operator).transfer(total_balance);
 
-        round.state = 3; //lottery finished
+            emit BalanceContractAfterClosing(address(this).balance);
 
-        emit RoundAfterClosing(round.number, round.state, round.start_block);
+            emit BalanceOpAfterClosing(
+                lottery_operator,
+                lottery_operator.balance
+            );
 
-        emit BalanceContractAfterClosing(address(this).balance);
+            delete_();
+            round.state = 3; //lottery finished
 
-        emit BalanceOpAfterClosing(lottery_operator, lottery_operator.balance);
+            emit RoundAfterClosing(
+                round.number,
+                round.state,
+                round.start_block
+            );
+        }
     }
 }

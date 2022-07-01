@@ -129,6 +129,13 @@ App = {
         App.lottery_round = event.returnValues.round_number;
         App.lottery_round_state = event.returnValues.round_state;
 
+        $('#sold_tickets').html("<strong>Amount of Sold Tickets:</strong> 0");
+        $('#sold_tickets_list').html("<strong>List of Sold Tickets:</strong> - ");
+        $('#drawn_numbers').html("<strong>Drawn Numbers:</strong> - ");
+        $('#drawn_numbers_player').html("<strong>Drawn Numbers:</strong> - ");
+        $("#assigned_prizes").html("<strong>Assigned Prizes:</strong> - ");
+
+
         $("#lottery_round").html("<strong>Lottery Round:</strong> " + event.returnValues.round_number);
         $("#lottery_round_player").html("<strong>Lottery Round:</strong> " + event.returnValues.round_number);
 
@@ -164,12 +171,6 @@ App = {
 
         $("#lottery_round").html("<strong>Lottery Round:</strong> " + event.returnValues.round_num);
         $("#lottery_round_player").html("<strong>Lottery Round:</strong> " + event.returnValues.round_num);
-
-        $('#sold_tickets').html("<strong>Amount of Sold Tickets:</strong> 0");
-        $('#sold_tickets_list').html("<strong>List of Sold Tickets:</strong> - ");
-        $('#drawn_numbers').html("<strong>Drawn Numbers:</strong> - ");
-        $('#drawn_numbers_player').html("<strong>Drawn Numbers:</strong> - ");
-        $("#assigned_prizes").html("<strong>Assigned Prizes:</strong> - ");
 
         if (App.lottery_round_state == 0) {
           $("#lottery_round_state").html("<strong>Lottery Round State:</strong> round not started");
@@ -654,7 +655,7 @@ function getNumBoughtTickets() {
       let numBoughtTickets = await instance.getNumBoughtTickets(App.account, { from: App.account });
       $('#num_tickets').empty();
       $('#num_tickets').html("<strong>Amount of Bought Tickets:</strong> " + numBoughtTickets);
-      
+
     } catch {
       $('#num_tickets').html("<strong>Amount of Bought Tickets:</strong> there are no bought tickets at the moment!");
     }
