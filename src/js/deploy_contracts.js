@@ -7,7 +7,7 @@ App = {
     balance: 0,
     price: 10, //wei
     m: 2,
-    k: 123,
+    k: 2,
     nft_addr: '0x0',
 
     init: function () {

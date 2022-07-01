@@ -122,7 +122,7 @@ App = {
     console.log("Inside listenForEvents");
 
     App.contracts["Contract"].deployed().then(async (instance) => {
-      
+
       // Round event
       instance.Round().on('data', function (event) {
         App.lottery_state = 'lottery created';
@@ -229,19 +229,9 @@ App = {
         $("#lottery_round_state").html("<strong>Lottery Round State:</strong> round finished");
         $("#lottery_round_state_player").html("<strong>Lottery Round State:</strong> round finished");
 
-        $("#drawn_numbers").html("<strong>Drawn Numbers:</strong> " + event.returnValues.n1 + " "
-          + event.returnValues.n2 + " "
-          + event.returnValues.n3 + " "
-          + event.returnValues.n4 + " "
-          + event.returnValues.n5 + " "
-          + event.returnValues.n6);
-
-        $("#drawn_numbers_player").html("<strong>Drawn Numbers:</strong> " + event.returnValues.n1 + " "
-          + event.returnValues.n2 + " "
-          + event.returnValues.n3 + " "
-          + event.returnValues.n4 + " "
-          + event.returnValues.n5 + " "
-          + event.returnValues.n6);
+        let drawn_numbers = getDrawnNumbers();
+        $('#drawn_numbers').html("<strong>Drawn Numbers:</strong> " + drawn_numbers);
+        $('#drawn_numbers_player').html("<strong>Drawn Numbers:</strong> " + drawn_numbers);
 
         console.log("Event WinningTicket catched!");
 
@@ -635,7 +625,7 @@ function getListSoldTickets() {
           res = await instance.getTicket(i, { from: App.account });
 
           if (res[2] != 0) {
-            $('#sold_tickets_list').append("<br> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <i>Ticket " + (i + 1) + "</i> ==> Player: " + res[0] + " - Numbers: " + res[1][0] + " " + res[1][1] + " " + res[1][2] + " " + res[1][3] + " " + res[1][4] + " " + res[2]);
+            $('#sold_tickets_list').append("<br> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <i>Ticket " + (i + 1) + "</i> ==> Player: " + res[0].toLowerCase() + " - Numbers: " + res[1][0] + " " + res[1][1] + " " + res[1][2] + " " + res[1][3] + " " + res[1][4] + " " + res[2]);
           }
         }
 
@@ -658,7 +648,7 @@ function getNumBoughtTickets() {
 
     try {
       let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      App.account = accounts[0];
+      App.account = accounts[0].toLowerCase();
 
       let numBoughtTickets = await instance.getNumBoughtTickets(App.account, { from: App.account });
       $('#num_tickets').empty();
@@ -682,7 +672,10 @@ function getListBoughtTickets() {
 
     try {
 
-      let n = await instance.getNumBoughtTickets(App.account, { from: App.account });
+      let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      App.account = accounts[0].toLowerCase();
+
+      let n = await instance.getNumTickets({ from: App.account });
 
       $('#list_tickets').empty();
       $('#list_tickets').html("<strong>List of Bought Tickets:</strong><br>");
@@ -692,6 +685,7 @@ function getListBoughtTickets() {
         for (let i = 0; i < n; i++) {
 
           res = await instance.getTicket(i, { from: App.account });
+          console.log(res);
 
           if (App.account == res[0].toLowerCase()) {
             $('#list_tickets').append("<br> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <i>Ticket " + (i + 1) + "</i> ==> " + res[1][0] + " " + res[1][1] + " " + res[1][2] + " " + res[1][3] + " " + res[1][4] + " " + res[2]);
@@ -778,7 +772,7 @@ function getListAssignedPrizes() {
           let res = await instance.getAssignedPrize(i, { from: App.account });
 
           if (res[1] != 0 && res[2] != 0) {
-            $('#assigned_prizes').append("<br> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <i>Player</i>: " + res[0] + " ==> Prize " + res[2] + " of rank " + res[1]);
+            $('#assigned_prizes').append("<br> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <i>Player</i>: " + res[0].toLowerCase() + " ==> Prize " + res[2] + " of rank " + res[1]);
           }
         }
 

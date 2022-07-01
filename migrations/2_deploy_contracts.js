@@ -3,7 +3,7 @@ var Lottery = artifacts.require("./Lottery.sol");
 
 const TICKET_PRICE = 10;
 const M = 2;
-const K = 123;
+const K = 2;
 
 module.exports = function (deployer) {
     deployer.then(async () => {

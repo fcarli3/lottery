@@ -90,23 +90,6 @@ contract Lottery {
         return collection.length;
     }
 
-    function getNFT(uint256 id) public view returns (string memory) {
-        string memory res = "";
-
-        if (id < 0 || id >= collection.length) {
-            return res;
-        }
-
-        for (uint256 i = 0; i < collection.length; i++) {
-            if (id == collection[i].tokenId) {
-                res = collection[i].content;
-                break;
-            }
-        }
-
-        return res;
-    }
-
     function getNumTickets() public view returns (uint256) {
         return lottery_players.length;
     }
@@ -146,12 +129,17 @@ contract Lottery {
 
     function getDrawnNumbers() public view returns (uint256[6] memory) {
         uint256[6] memory res;
+        uint256[5] memory standard_num;
 
-        for (uint256 i = 0; i < 5; i++) {
-            res[i] = standard_numbers[i];
-        }
-
-        res[5] = special_number;
+        standard_num = sortDrawnNumbers();
+        res = [
+            standard_num[0],
+            standard_num[1],
+            standard_num[2],
+            standard_num[3],
+            standard_num[4],
+            special_number
+        ];
 
         return res;
     }
@@ -243,9 +231,11 @@ contract Lottery {
         view
         returns (uint256)
     {
-        uint256 end_lottery_block = round.start_block + M;
+        uint256 end_lottery_block = round.start_block + M + K;
 
-        bytes32 rand = keccak256(abi.encode(end_lottery_block, seed, K));
+        bytes32 rand = keccak256(
+            abi.encode(blockhash(end_lottery_block), seed)
+        );
         uint256 random_number = uint256(rand);
 
         return random_number;
@@ -262,6 +252,30 @@ contract Lottery {
         delete prizes;
         delete lottery_players;
         delete lottery_winners;
+    }
+
+    //Function that sort the winning numbers in ascendent order
+    function sortDrawnNumbers() internal view returns (uint256[5] memory) {
+        uint256[5] memory drawn_numbers = [
+            standard_numbers[0],
+            standard_numbers[1],
+            standard_numbers[2],
+            standard_numbers[3],
+            standard_numbers[4]
+        ];
+        uint256 temp;
+
+        for (uint256 i = 0; i < drawn_numbers.length; i++) {
+            for (uint256 j = i + 1; j < drawn_numbers.length; j++) {
+                if (drawn_numbers[i] > drawn_numbers[j]) {
+                    temp = drawn_numbers[i];
+                    drawn_numbers[i] = drawn_numbers[j];
+                    drawn_numbers[j] = temp;
+                }
+            }
+        }
+
+        return drawn_numbers;
     }
 
     event Collectible(string str, uint256 id, uint256 rank, string content);
@@ -437,7 +451,7 @@ contract Lottery {
     //Function that draw the winning ticket using a RNG
     function drawNumbers() public lotteryOperator returns (bool) {
         require(
-            round.state == 1 && (block.number - round.start_block) >= M,
+            round.state == 1 && (block.number - round.start_block) >= M + K,
             "Error: invalid lottery state, impossible to draw numbers!"
         );
 
