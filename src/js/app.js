@@ -647,12 +647,14 @@ function getNumBoughtTickets() {
   App.contracts["Contract"].deployed().then(async (instance) => {
 
     try {
+
       let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       App.account = accounts[0].toLowerCase();
 
       let numBoughtTickets = await instance.getNumBoughtTickets(App.account, { from: App.account });
       $('#num_tickets').empty();
       $('#num_tickets').html("<strong>Amount of Bought Tickets:</strong> " + numBoughtTickets);
+      
     } catch {
       $('#num_tickets').html("<strong>Amount of Bought Tickets:</strong> there are no bought tickets at the moment!");
     }
@@ -685,7 +687,6 @@ function getListBoughtTickets() {
         for (let i = 0; i < n; i++) {
 
           res = await instance.getTicket(i, { from: App.account });
-          console.log(res);
 
           if (App.account == res[0].toLowerCase()) {
             $('#list_tickets').append("<br> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <i>Ticket " + (i + 1) + "</i> ==> " + res[1][0] + " " + res[1][1] + " " + res[1][2] + " " + res[1][3] + " " + res[1][4] + " " + res[2]);
