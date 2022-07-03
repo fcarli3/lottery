@@ -467,7 +467,7 @@ function getOperator() {
 
   App.contracts["Contract"].deployed().then(async (instance) => {
 
-    let op = await instance.getLotteryOperator({ from: App.accBalanceOpAfterClosingount });
+    let op = await instance.getLotteryOperator({ from: App.account });
     App.account_operator = op.toLowerCase();
     App.setAccount(App.account_change);
 
