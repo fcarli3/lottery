@@ -315,7 +315,8 @@ contract Lottery {
         uint256 price_,
         uint256 M_,
         uint256 K_,
-        address lottery_address
+        address lottery_address,
+        address lottery_op
     ) {
         if (price_ <= 0) {
             price = 10;
@@ -336,7 +337,7 @@ contract Lottery {
         }
 
         round = lotteryRound(0, 0, 0);
-        lottery_operator = msg.sender;
+        lottery_operator = lottery_op;
 
         resetDraw();
 

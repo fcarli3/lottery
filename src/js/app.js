@@ -14,6 +14,9 @@ App = {
   lottery_round_state: 0,
   token_to_mint: 1,
   price: 10, //wei
+  m: 2,
+  k: 2,
+  lottery_address: '0x0',
 
   init: function () {
 
@@ -49,7 +52,7 @@ App = {
 
 
   // Upload the contract's abstractions into the local App.contracts object.
-  initContract: function () {
+  initContract: async function () {
 
     console.log("Inside initContract");
 
@@ -61,13 +64,59 @@ App = {
       }
     });
 
-    // Load content's abstractions
-    $.getJSON("Lottery.json").done(function (c) {
-      App.contracts["Contract"] = TruffleContract(c);
-      App.contracts["Contract"].setProvider(App.web3Provider);
+    let account = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    App.account = account[0].toLowerCase();
 
-      return App.initDApp();
-    });
+    App.balance = await web3.utils.fromWei(await web3.eth.getBalance(account[0]));
+
+    $("#balance").html("<strong>Balance: </strong>" + App.balance + " ETH");
+
+    let deployerJson = await $.getJSON('Deployer.json');
+    App.contracts["Deployer"] = await TruffleContract(deployerJson);
+    App.contracts["Deployer"].setProvider(App.web3Provider);
+
+    let lotteryJson = await $.getJSON('Lottery.json');
+    App.contracts['Lottery'] = await TruffleContract(lotteryJson);
+    App.contracts["Lottery"].setProvider(App.web3Provider);
+
+    if (window.location.href.toString().toLowerCase() == 'http://localhost:3000/lottery.html') {
+
+      App.contracts["Deployer"].deployed().then(async (instance) => {
+
+        App.lottery_address = await instance.getLotteryAddress({ from: App.account });
+        console.log("Lottery Address: " + App.lottery_address);
+
+        return App.initDApp();
+
+      });
+    }
+  },
+
+
+  // Deploy the Lottery contract through Deployer.sol
+  createLottery: async function () {
+
+    try {
+
+      console.log('Inside createLottery');
+
+      App.contracts["Deployer"].deployed().then(async (instance) => {
+
+        let tx = await instance.createLottery({ from: App.account });
+
+        App.lottery_address = tx.receipt.to;
+
+        await App.contracts["Lottery"].at(App.lottery_address);
+
+        console.log('Lottery Address: ' + App.lottery_address);
+
+        window.location.replace("lottery.html");
+
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
   },
 
 
@@ -121,7 +170,7 @@ App = {
 
     console.log("Inside listenForEvents");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       // Round event
       instance.Round().on('data', function (event) {
@@ -311,7 +360,7 @@ App = {
 
     console.log("Inside startNewRound");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       try {
 
@@ -334,7 +383,7 @@ App = {
 
     console.log("Inside closeRound");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       try {
 
@@ -355,7 +404,7 @@ App = {
 
     console.log("Inside closeLottery");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       try {
 
@@ -376,7 +425,7 @@ App = {
 
     console.log("Inside drawNumbers");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       try {
 
@@ -397,7 +446,7 @@ App = {
 
     console.log("Inside mint");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       try {
 
@@ -417,7 +466,7 @@ App = {
 
     console.log("Inside givePrizes");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       try {
 
@@ -435,7 +484,7 @@ App = {
 
     console.log("Inside buy");
 
-    App.contracts["Contract"].deployed().then(async (instance) => {
+    App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
       try {
 
@@ -465,10 +514,11 @@ App = {
 // Function that retrieve the address of the lottery operator
 function getOperator() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     let op = await instance.getLotteryOperator({ from: App.account });
     App.account_operator = op.toLowerCase();
+    console.log("Account Operator: " + App.account_operator);
     App.setAccount(App.account_change);
 
   });
@@ -478,7 +528,7 @@ function getOperator() {
 // Function that retrieve the balance of the lottery smart contract
 function getLotteryBalance() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     App.lottery_balance = await instance.getLotteryBalance({ from: App.account });
     let eth_balance = Web3.utils.fromWei(App.lottery_balance, 'ether');
@@ -493,7 +543,7 @@ function getLotteryState() {
 
   console.log('inside getLotteryState');
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     let res = await instance.getLotteryState({ from: App.account });
 
@@ -512,7 +562,7 @@ function getLotteryState() {
 //Function that retrieve the lottery round
 function getLotteryRound() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     App.lottery_round = await instance.getLotteryRound({ from: App.account });
     $('#lottery_round').html("<strong>Lottery Round:</strong> " + App.lottery_round);
@@ -525,7 +575,7 @@ function getLotteryRound() {
 //Function that retrieve the lottery round state
 function getLotteryRoundState() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
 
     let res = await instance.getLotteryRoundState({ from: App.account });
@@ -559,7 +609,7 @@ function getLotteryRoundState() {
 //Function that reset the lottery round after calling closeLottery
 function resetLotteryRound() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     await instance.resetLotteryRound({ from: App.account });
 
@@ -570,7 +620,7 @@ function resetLotteryRound() {
 //Function that retrieve the number of available NFTs
 function getNumNFT() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
 
@@ -589,7 +639,7 @@ function getNumNFT() {
 //Function that retrieve the amount of sold tickets in a lottery round
 function getNumTickets() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
       let numTickets = await instance.getNumTickets({ from: App.account });
@@ -610,7 +660,7 @@ function getListSoldTickets() {
 
   let res;
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
 
@@ -645,7 +695,7 @@ function getListSoldTickets() {
 //Function that retrieve the amount of bought tickets in a lottery round by a given player
 function getNumBoughtTickets() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
 
@@ -671,7 +721,7 @@ function getListBoughtTickets() {
 
   let res;
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
 
@@ -708,7 +758,7 @@ function getListBoughtTickets() {
 //Function that retrieve the winning numbers of a lottery round
 function getDrawnNumbers() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
 
@@ -738,7 +788,7 @@ function getDrawnNumbers() {
 //Function that retrieve the amount of assigned prizes in a lottery round
 function getNumAssignedPrizes() {
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
 
@@ -758,7 +808,7 @@ function getListAssignedPrizes() {
 
   console.log('Inside list of assigned prizes');
 
-  App.contracts["Contract"].deployed().then(async (instance) => {
+  App.contracts["Lottery"].at(App.lottery_address).then(async (instance) => {
 
     try {
 

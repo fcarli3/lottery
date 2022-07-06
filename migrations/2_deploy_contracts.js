@@ -1,13 +1,9 @@
-var NFT = artifacts.require("./LotteryGame.sol");
-var Lottery = artifacts.require("./Lottery.sol");
-
-const TICKET_PRICE = 10;
-const M = 2;
-const K = 2;
+var LotteryGame = artifacts.require("./LotteryGame.sol");
+var Deployer = artifacts.require("./Deployer.sol");
 
 module.exports = function (deployer) {
     deployer.then(async () => {
-        await deployer.deploy(NFT, { from: arguments[2][0] });
-        await deployer.deploy(Lottery, TICKET_PRICE, M, K, NFT.address, { from: arguments[2][0] });
+        await deployer.deploy(LotteryGame, { from: arguments[2][0] });
+        await deployer.deploy(Deployer, LotteryGame.address, arguments[2][0], { from: arguments[2][0] });
     });
 }
